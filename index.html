@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>命运方舟团队成员统计表</title>
+    <style>
+        /* 表格整体样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        
+        /* 表头样式 */
+        th {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        /* 单元格样式 */
+        td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        
+        /* 新增按钮样式 */
+        .btn {
+            padding: 5px 10px;
+            margin: 2px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .btn-add {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn-delete {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        /* 职业信息编辑样式 */
+        .class-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .class-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background-color: #f8f9fa;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        
+        .class-input {
+            padding: 3px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        
+        /* 隔行变色 */
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        /* 鼠标悬停效果 */
+        tr:hover {
+            background-color: #ddd;
+        }
+        
+        /* 标题样式 */
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.12.0/dist/av-live-query-min.js"></script>
+</head>
+<body>
+    <h1>命运方舟团队成员统计表</h1>
+    <button onclick="addNewRow()" class="btn btn-add">添加新玩家</button>
+    <table id="playerTable">
+        <thead>
+            <tr>
+                <th>序号</th>
+                <th>玩家ID</th>
+                <th>职业信息</th>
+                <th>主要在线时间</th>
+                <th>周活跃度</th>
+                <th>备注</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+    </table>
+
+    <script>
+        // 初始化 LeanCloud
+        AV.init({
+            appId: "z4bqm8i6YC3g8Vblbsj76kP-gz6oHsz",
+            appKey: "C0BWw4x1RycSOIjWmQ2PA8qt",
+            serverURL: "https://z4bqm8i6.lc-cn-n1-shared.com"
+        });
+        
+        // 定义 Player 类
+        const Player = AV.Object.extend('Player');
+        
+        // 职业列表
+        const classes = ['战士', '法师', '刺客', '枪手', '术士', '召唤师', '魔剑士', '暗杀者'];
+        
+        // 添加新玩家行
+        async function addNewRow() {
+            const tbody = document.getElementById('tableBody');
+            const newRow = document.createElement('tr');
+            const rowNum = tbody.children.length + 1;
+            
+            // 创建新的 Player 对象
+            const player = new Player();
+            await player.save({
+                rowNum: rowNum,
+                playerId: '',
+                classes: [{
+                    className: classes[0],
+                    level: ''
+                }],
+                onlineTime: '',
+                activity: '★',
+                notes: ''
+            });
+            
+            newRow.dataset.objectId = player.id;
+            
+            newRow.innerHTML = `
+                <td>${rowNum}</td>
+                <td><input type="text" class="class-input" placeholder="输入ID"></td>
+                <td>
+                    <div class="class-info">
+                        <div class="class-item">
+                            <select class="class-input">${getClassOptions()}</select>
+                            <input type="number" class="class-input" placeholder="装等" min="0" max="1600">
+                            <button onclick="deleteClass(this)" class="btn btn-delete">删除职业</button>
+                        </div>
+                    </div>
+                    <button onclick="addClass(this)" class="btn btn-add">添加职业</button>
+                </td>
+                <td><input type="text" class="class-input" placeholder="在线时间"></td>
+                <td>
+                    <select class="class-input">
+                        <option>★</option>
+                        <option>★★</option>
+                        <option>★★★</option>
+                        <option>★★★★</option>
+                        <option>★★★★★</option>
+                    </select>
+                </td>
+                <td><input type="text" class="class-input" placeholder="备注"></td>
+                <td><button onclick="deleteRow(this)" class="btn btn-delete">删除玩家</button></td>
+            `;
+            
+            tbody.appendChild(newRow);
+            updateRowNumbers();
+        }
+        
+        // 获取职业选项
+        function getClassOptions() {
+            return classes.map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+        
+        // 添加职业
+        function addClass(btn) {
+            const classInfo = btn.previousElementSibling;
+            const newClassItem = document.createElement('div');
+            newClassItem.className = 'class-item';
+            newClassItem.innerHTML = `
+                <select class="class-input">${getClassOptions()}</select>
+                <input type="number" class="class-input" placeholder="装等" min="0" max="1600">
+                <button onclick="deleteClass(this)" class="btn btn-delete">删除职业</button>
+            `;
+            classInfo.appendChild(newClassItem);
+        }
+        
+        // 删除职业
+        function deleteClass(btn) {
+            const classItem = btn.parentElement;
+            const classInfo = classItem.parentElement;
+            if (classInfo.children.length > 1) {
+                classItem.remove();
+            } else {
+                alert('至少保留一个职业！');
+            }
+        }
+        
+        // 删除玩家行
+        function deleteRow(btn) {
+            const row = btn.parentElement.parentElement;
+            row.remove();
+            updateRowNumbers();
+        }
+        
+        // 更新序号
+        function updateRowNumbers() {
+            const rows = document.getElementById('tableBody').children;
+            for (let i = 0; i < rows.length; i++) {
+                rows[i].children[0].textContent = i + 1;
+            }
+        }
+
+        // 添加数据同步函数
+        async function syncData(element) {
+            const row = element.closest('tr');
+            const objectId = row.dataset.objectId;
+            const player = AV.Object.createWithoutData('Player', objectId);
+            
+            const data = {
+                playerId: row.querySelector('td:nth-child(2) input').value,
+                classes: Array.from(row.querySelectorAll('.class-item')).map(item => ({
+                    className: item.querySelector('select').value,
+                    level: item.querySelector('input[type="number"]').value
+                })),
+                onlineTime: row.querySelector('td:nth-child(4) input').value,
+                activity: row.querySelector('td:nth-child(5) select').value,
+                notes: row.querySelector('td:nth-child(6) input').value
+            };
+            
+            await player.save(data);
+        }
+        
+        // 添加实时数据监听
+        const query = new AV.Query('Player');
+        query.subscribe().then((subscription) => {
+            subscription.on('update', (player) => {
+                updateRowData(player);
+            });
+        });
+        
+        // 更新行数据的函数
+        function updateRowData(player) {
+            const row = document.querySelector(`tr[data-object-id="${player.id}"]`);
+            if (!row) return;
+            
+            const data = player.toJSON();
+            row.querySelector('td:nth-child(2) input').value = data.playerId;
+            // ... 更新其他字段 ...
+        }
+        
+        // 修改现有输入元素，添加 onchange 事件
+        function addInputListeners(row) {
+            const inputs = row.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.addEventListener('change', () => syncData(input));
+            });
+        }
+
+        // 初始化添加一行
+        window.onload = function() {
+            addNewRow();
+        }
+
+        AV.Cloud.run('ping').then((data) => {
+            console.log('连接成功！');
+        }).catch((error) => {
+            console.error('连接失败：', error);
+        });
+    </script>
+</body>
+</html> 
