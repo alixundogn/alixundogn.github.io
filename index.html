@@ -111,6 +111,10 @@
             appId: "z4bqm8i6YC3g8Vblbsj76kP-gz6oHsz",
             appKey: "C0BWw4x1RycSOIjWmQ2PA8qt",
             serverURL: "https://z4bqm8i6.lc-cn-n1-shared.com"
+        }).then(() => {
+            console.log('LeanCloud 初始化成功');
+        }).catch(error => {
+            console.error('LeanCloud 初始化失败:', error);
         });
         
         // 定义 Player 类
@@ -169,6 +173,7 @@
             `;
             
             tbody.appendChild(newRow);
+            addInputListeners(newRow);
             updateRowNumbers();
         }
         
@@ -258,7 +263,12 @@
         function addInputListeners(row) {
             const inputs = row.querySelectorAll('input, select');
             inputs.forEach(input => {
-                input.addEventListener('change', () => syncData(input));
+                input.addEventListener('change', () => {
+                    console.log('值改变:', input.value);
+                    syncData(input).catch(error => {
+                        console.error('同步数据失败:', error);
+                    });
+                });
             });
         }
 
@@ -272,6 +282,11 @@
         }).catch((error) => {
             console.error('连接失败：', error);
         });
+
+        window.onerror = function(msg, url, line) {
+            console.error('Error: ' + msg + '\nURL: ' + url + '\nLine: ' + line);
+            return false;
+        };
     </script>
 </body>
 </html> 
