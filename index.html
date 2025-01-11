@@ -107,21 +107,20 @@
 
     <script>
         // 初始化 LeanCloud
-        AV.init({
-            appId: "z4bqm8i6YC3g8Vblbsj76kP-gz6oHsz",
-            appKey: "C0BWw4x1RycSOIjWmQ2PA8qt",
-            serverURL: "https://z4bqm8i6.lc-cn-n1-shared.com"
-        }).then(() => {
-            console.log('LeanCloud 初始化成功');
-        }).catch(error => {
-            console.error('LeanCloud 初始化失败:', error);
-        });
-        
+        // 初始化 LeanCloud
+    // 初始化 LeanCloud
+AV.init({
+    appId: "rb19V7zFtK9UWSowsa961Dtg-gzGzoHsz",
+    appKey: "plFGjdt1Fh1YoFoHeLQR13dB",
+    serverURL: "https://rb19v7zf.lc-cn-n1-shared.com"
+});
+    
+
         // 定义 Player 类
         const Player = AV.Object.extend('Player');
         
         // 职业列表
-        const classes = ['战士', '法师', '刺客', '枪手', '术士', '召唤师', '魔剑士', '暗杀者'];
+        const classes = ['枪术', '男拳', '刺客', '枪手', '术士', '召唤师', '魔剑士', '暗杀者'];
         
         // 添加新玩家行
         async function addNewRow() {
