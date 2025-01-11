@@ -107,15 +107,18 @@
 
     <script>
         // 初始化 LeanCloud
-        // 初始化 LeanCloud
-    // 初始化 LeanCloud
-AV.init({
-    appId: "rb19V7zFtK9UWSowsa961Dtg-gzGzoHsz",
-    appKey: "plFGjdt1Fh1YoFoHeLQR13dB",
-    serverURL: "https://rb19v7zf.lc-cn-n1-shared.com"
-});
-    
-
+        AV.init({
+            appId: "w3bWPPQpJHG8w2PF0mRfVoto-gzGzoHsz",
+            appKey: "hFdf3MuCUtHCLZ1rkQpwG8LT",
+            serverURL: "https://w3bwppqp.lc-cn-n1-shared.com"
+        });
+        
+        // 设置默认 ACL
+        const defaultACL = new AV.ACL();
+        defaultACL.setPublicReadAccess(true);
+        defaultACL.setPublicWriteAccess(true);
+        AV.setACL(defaultACL);
+        
         // 定义 Player 类
         const Player = AV.Object.extend('Player');
         
